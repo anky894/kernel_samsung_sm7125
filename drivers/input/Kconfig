@@ -200,6 +200,14 @@ config INPUT_TOUCHSCREEN_TCLMV2
 
           If unsure, say N.
 
+config INPUT_SEC_SECURE_TOUCH
+        bool "sec secure touch"
+        depends on I2C
+        help
+          Say Y here if you need to use tclm.
+
+          If unsure, say N.
+
 config INPUT_KEYRESET
 	bool "Reset key"
 	depends on INPUT
