@@ -1,3 +1,17 @@
+config SEC_A52Q_PROJECT
+	depends on ARCH_ATOLL
+	default n
+	bool "Samsung A52Q Project"
+	help
+	  Support for Samsung A52Q Project
+
+config SEC_A52Q_EUR_OPEN
+	depends on SEC_A52Q_PROJECT 
+	default n
+	bool "Samsung A52Q EUR OPEN"
+	help
+	  Support for Samsung A52Q EUR OPEN device.
+
 config SEC_GTA4XLVE_PROJECT
 	default n
 	bool "Samsung GTA4XLVE Project"
