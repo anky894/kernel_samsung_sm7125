@@ -13,12 +13,24 @@
 &tlmm {
 	tas25xx_gpio_default: tas25xx_gpio_default {
 		mux {
-			pins = "gpio90", "gpio94", "gpio118";
+			pins = "gpio88", "gpio89", "gpio90", "gpio94";
 			function = "gpio";
 		};
 		config {
-			pins = "gpio90", "gpio94", "gpio118";
+			pins = "gpio88", "gpio89", "gpio90", "gpio94";
 			bias-disable; /* No PULL */
+		};
+	};
+
+	fm_lna_default: fm_lna_default {
+		mux {
+			pins = "gpio84";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio84";
+			bias-disable; /* No PULL */
+			output-low;
 		};
 	};
 };

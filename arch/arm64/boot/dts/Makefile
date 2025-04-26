@@ -15,7 +15,7 @@ dts-dirs += hisilicon
 dts-dirs += marvell
 dts-dirs += mediatek
 dts-dirs += nvidia
-ifeq ($(CONFIG_SEC_GTA4XLVE_PROJECT),y)
+ifeq ($(CONFIG_SEC_A52Q_PROJECT),y)
 dts-dirs += samsung
 else
 dts-dirs += qcom

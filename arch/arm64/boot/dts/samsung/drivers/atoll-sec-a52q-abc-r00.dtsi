@@ -20,7 +20,7 @@
 
 				gpu {
 					gpu,label="GPU fault";
-					gpu,threshold_count=<2>;
+					gpu,threshold_count=<4>;
 					gpu,threshold_time=<1200>;
 				};
 				gpu_page {

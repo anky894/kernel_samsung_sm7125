@@ -14,12 +14,12 @@
 /plugin/;
 
 #include "atoll-sec-common.dtsi"
-#include "gta4xlve/atoll-sec-gta4xlve-r00.dtsi"
-
+#include "atoll-sec-a52q-r05.dtsi"
+#include "drivers/atoll-sec-a52q-battery-r04.dtsi"
 
 / {
-	model = "Samsung GTA4XLVE EUR PROJECT BRINGUP (board-id,00)";
+	model = "Samsung A52Q PROJECT REV03 (board-id,05)";
 	compatible = "qcom,atoll-ab-idp", "qcom,atoll-ab", "qcom,idp";
-	qcom,board-id = <34 0>;
+	qcom,board-id = <34 5>;
 	dtbo-version = <0>;
 };

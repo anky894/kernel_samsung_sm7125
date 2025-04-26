@@ -10,30 +10,15 @@
  * GNU General Public License for more details.
  */
 
+#include "atoll-sec-a52q-r01.dtsi"
+#include "atoll-sec-a52q-pinctrl-r02.dtsi"
+#include "drivers/atoll-sec-a52q-camera-sensor-r02.dtsi"
 
-&reserved_memory {
-
+&vibrator {
+	samsung,vib_en = <&tlmm 57 0>;
 };
 
-&soc {
-	icnss: qcom,icnss@18800000 {
-		pinctrl-names = "default";
-		pinctrl-0 = <&rome_cable_default>;
-	};
-	rome_cable {
-		compatible = "samsung,rome_cable";
-		wlan_cable_wifi_1 = <&tlmm 75 0>;
-		wlan_cable_wifi_2 = <&tlmm 43 0>;
-		status = "ok";
-	};
-};
-
-&sdhc_1 {
-	status = "disabled";
-};
-
-&sdhc_2 {
-	qcom,clk-rates = <400000 20000000 25000000
-			50000000 100000000 179555556>;
-	qcom,devfreq,freq-table = <50000000 179555556>;
+&tsp_zt {
+	status = "okay";
+	zinitix,bringup = <0>;
 };

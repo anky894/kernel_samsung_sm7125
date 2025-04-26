@@ -1,8 +1,13 @@
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 
-# GTA4XLVE EUR
-SEC_GTA4XLVE_EUR_DTBO := \
-		atoll-sec-gta4xlve-eur-overlay-r00.dtbo
+# A52Q EUR
+SEC_A52Q_EUR_DTBO := \
+		atoll-sec-a52q-eur-overlay-r00.dtbo \
+		atoll-sec-a52q-eur-overlay-r01.dtbo \
+		atoll-sec-a52q-eur-overlay-r02.dtbo \
+		atoll-sec-a52q-eur-overlay-r04.dtbo \
+		atoll-sec-a52q-eur-overlay-r05.dtbo \
+		atoll-sec-a52q-eur-overlay-r06.dtbo
 
 define __sec_dtbo_build
 dtbo-$(2) += $(1)
@@ -16,9 +21,10 @@ endef
 # SM7125 BASE DTB
 SEC_ATOLL_BASE_DTB := ../qcom/atoll-ab-idp.dtb
 
+ifeq ($(filter y,$(CONFIG_SEC_A52Q_PROJECT)),y)
 $(eval $(call sec_dtbo_build, \
-		$(SEC_GTA4XLVE_EUR_DTBO),$(CONFIG_SEC_GTA4XLVE_EUR_OPEN),$(SEC_ATOLL_BASE_DTB)))
-
+		$(SEC_A52Q_EUR_DTBO),$(CONFIG_SEC_A52Q_EUR_OPEN),$(SEC_ATOLL_BASE_DTB)))
+endif
 endif
 
 ifeq ($(CONFIG_ARM64),y)
