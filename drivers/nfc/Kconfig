@@ -76,4 +76,14 @@ config NTAG_NQ
           NTAG is NFC tags that combine passive NFC interface with contact i2c interface.
           This is for i2c connected version.
 
+config SEC_NFC_V2
+        bool "Samsung NFC V2 driver"
+        default n
+        help
+          SAMSUNG NFC Driver for latest NFC IC.(ex. SEN4/RN4V/SN4V)
+          This driver provides support for SAMSUNG NFC products.
+          You should select your NFC product and interface.
+          Say Y here to compile support for SAMSUNG NFC driver into the
+          kernel.
+
 source "drivers/nfc/max32560/Kconfig"
