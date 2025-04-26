@@ -118,7 +118,6 @@ struct dsi_backlight_config {
 	u32 bl_level;
 	u32 bl_scale;
 	u32 bl_scale_ad;
-	bool bl_inverted_dbv;
 
 	int en_gpio;
 	/* PWM params */
@@ -152,7 +151,7 @@ enum esd_check_status_mode {
 	ESD_MODE_PANEL_TE,
 	ESD_MODE_SW_SIM_SUCCESS,
 	ESD_MODE_SW_SIM_FAILURE,
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 	ESD_MODE_PANEL_IRQ,
 #endif
 	ESD_MODE_MAX
@@ -222,7 +221,7 @@ struct dsi_panel {
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 	void *panel_private;
 	struct device_node *self_display_of_node;
 	struct dsi_parser_utils self_display_utils;
@@ -350,6 +349,16 @@ struct dsi_panel *dsi_panel_ext_bridge_get(struct device *parent,
 int dsi_panel_parse_esd_reg_read_configs(struct dsi_panel *panel);
 
 void dsi_panel_ext_bridge_put(struct dsi_panel *panel);
+
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+int dsi_panel_set_pinctrl_state(struct dsi_panel *panel, bool enable);
+int dsi_panel_power_on(struct dsi_panel *panel);
+int dsi_panel_power_off(struct dsi_panel *panel);
+int dsi_panel_tx_cmd_set(struct dsi_panel *panel, enum dsi_cmd_set_type type);
+int ss_dsi_panel_parse_cmd_sets(struct dsi_panel_cmd_set *cmd_sets,
+			struct dsi_panel *panel);
+int dsi_panel_reset(struct dsi_panel *panel);
+#endif
 
 #if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 #define SS_CMD_PROP_STR_LEN (100)

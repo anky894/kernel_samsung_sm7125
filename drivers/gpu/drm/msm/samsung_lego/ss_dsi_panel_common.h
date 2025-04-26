@@ -81,10 +81,17 @@ Copyright (C) 2012, Samsung Electronics. All rights reserved.
 #include "ss_ddi_poc_common.h"
 #include "ss_copr_common.h"
 
+#include "./SELF_DISPLAY/self_display.h"
+#include "./MAFPC/ss_dsi_mafpc_common.h"
+
 #include "ss_interpolation_common.h"
 #include "ss_flash_table_data_common.h"
 
 #include "ss_panel_notify.h"
+
+#if defined(CONFIG_SEC_DEBUG)
+#include <linux/sec_debug.h>
+#endif
 
 extern bool enable_pr_debug;
 
@@ -520,6 +527,118 @@ enum ss_dsi_cmd_set_type {
 	TX_SELF_IDLE_MOVE_ON_PATTERN4,
 	TX_SELF_IDLE_MOVE_OFF,
 
+	/* SELF DISPLAY */
+	TX_SELF_DISP_CMD_START,
+	TX_SELF_DISP_ON,
+	TX_SELF_DISP_OFF,
+	TX_SELF_TIME_SET,
+	TX_SELF_MOVE_ON,
+	TX_SELF_MOVE_ON_100,
+	TX_SELF_MOVE_ON_200,
+	TX_SELF_MOVE_ON_500,
+	TX_SELF_MOVE_ON_1000,
+	TX_SELF_MOVE_ON_DEBUG,
+	TX_SELF_MOVE_RESET,
+	TX_SELF_MOVE_OFF,
+	TX_SELF_MOVE_2C_SYNC_OFF,
+	TX_SELF_MASK_SET_PRE,
+	TX_SELF_MASK_SET_POST,
+	TX_SELF_MASK_SIDE_MEM_SET,
+	TX_SELF_MASK_ON,
+	TX_SELF_MASK_ON_FACTORY,
+	TX_SELF_MASK_OFF,
+	TX_SELF_MASK_GREEN_CIRCLE_ON,		/* Finger Print Green Circle */
+	TX_SELF_MASK_GREEN_CIRCLE_OFF,
+	TX_SELF_MASK_GREEN_CIRCLE_ON_FACTORY,
+	TX_SELF_MASK_GREEN_CIRCLE_OFF_FACTORY,
+	TX_SELF_MASK_IMAGE,
+	TX_SELF_MASK_IMAGE_CRC,
+	TX_SELF_ICON_SET_PRE,
+	TX_SELF_ICON_SET_POST,
+	TX_SELF_ICON_SIDE_MEM_SET,
+	TX_SELF_ICON_GRID,
+	TX_SELF_ICON_ON,
+	TX_SELF_ICON_ON_GRID_ON,
+	TX_SELF_ICON_ON_GRID_OFF,
+	TX_SELF_ICON_OFF_GRID_ON,
+	TX_SELF_ICON_OFF_GRID_OFF,
+	TX_SELF_ICON_GRID_2C_SYNC_OFF,
+	TX_SELF_ICON_OFF,
+	TX_SELF_ICON_IMAGE,
+	TX_SELF_BRIGHTNESS_ICON_ON,
+	TX_SELF_BRIGHTNESS_ICON_OFF,
+	TX_SELF_ACLOCK_SET_PRE,
+	TX_SELF_ACLOCK_SET_POST,
+	TX_SELF_ACLOCK_SIDE_MEM_SET,
+	TX_SELF_ACLOCK_ON,
+	TX_SELF_ACLOCK_TIME_UPDATE,
+	TX_SELF_ACLOCK_ROTATION,
+	TX_SELF_ACLOCK_OFF,
+	TX_SELF_ACLOCK_HIDE,
+	TX_SELF_ACLOCK_IMAGE,
+	TX_SELF_DCLOCK_SET_PRE,
+	TX_SELF_DCLOCK_SET_POST,
+	TX_SELF_DCLOCK_SIDE_MEM_SET,
+	TX_SELF_DCLOCK_ON,
+	TX_SELF_DCLOCK_BLINKING_ON,
+	TX_SELF_DCLOCK_BLINKING_OFF,
+	TX_SELF_DCLOCK_TIME_UPDATE,
+	TX_SELF_DCLOCK_OFF,
+	TX_SELF_DCLOCK_HIDE,
+	TX_SELF_DCLOCK_IMAGE,
+	TX_SELF_CLOCK_2C_SYNC_OFF,
+	TX_SELF_VIDEO_IMAGE,
+	TX_SELF_VIDEO_SIDE_MEM_SET,
+	TX_SELF_VIDEO_ON,
+	TX_SELF_VIDEO_OFF,
+	TX_SELF_PARTIAL_HLPM_SCAN_SET,
+	RX_SELF_DISP_DEBUG,
+	TX_SELF_MASK_CHECK_PRE1,
+	TX_SELF_MASK_CHECK_PRE2,
+	TX_SELF_MASK_CHECK_POST,
+	RX_SELF_MASK_CHECK,
+	TX_SELF_DISP_CMD_END,
+
+	/* MAFPC */
+	TX_MAFPC_CMD_START,
+	TX_MAFPC_FLASH_SEL,
+	TX_MAFPC_BRIGHTNESS_SCALE,
+	RX_MAFPC_READ_1,
+	RX_MAFPC_READ_2,
+	RX_MAFPC_READ_3,
+	TX_MAFPC_SET_PRE_FOR_INSTANT,
+	TX_MAFPC_SET_PRE,
+	TX_MAFPC_SET_PRE2,
+	TX_MAFPC_SET_POST,
+	TX_MAFPC_SET_POST_FOR_INSTANT,
+	TX_MAFPC_ON,
+	TX_MAFPC_ON_FACTORY,
+	TX_MAFPC_OFF,
+	TX_MAFPC_TE_ON,
+	TX_MAFPC_TE_OFF,
+	TX_MAFPC_IMAGE,
+	TX_MAFPC_CRC_CHECK_IMAGE,
+	TX_MAFPC_CRC_CHECK_PRE1,
+	TX_MAFPC_CRC_CHECK_PRE2,
+	TX_MAFPC_CRC_CHECK_POST,
+	RX_MAFPC_CRC_CHECK,
+	TX_MAFPC_CMD_END,
+
+	/* TEST MODE */
+	TX_TEST_MODE_CMD_START,
+	RX_GCT_CHECKSUM,
+	TX_GCT_ENTER,
+	TX_GCT_MID,
+	TX_GCT_EXIT,
+	TX_GRAY_SPOT_TEST_ON,
+	TX_GRAY_SPOT_TEST_OFF,
+	TX_MICRO_SHORT_TEST_ON,
+	TX_MICRO_SHORT_TEST_OFF,
+	TX_CCD_ON,
+	TX_CCD_OFF,
+	RX_CCD_STATE,
+	TX_TEST_MODE_CMD_END,
+
 	/* FLASH GAMMA */
 	TX_FLASH_GAMMA_PRE1,
 	TX_FLASH_GAMMA_PRE2,
@@ -734,6 +853,53 @@ struct samsung_display_debug_data {
 	/* misc */
 	struct miscdevice dev;
 	bool report_once;
+};
+
+struct self_display {
+	struct miscdevice dev;
+
+	int is_support;
+	int factory_support;
+	int on;
+	int file_open;
+	int time_set;
+	int enable_debug;
+
+	struct self_time_info st_info;
+	struct self_icon_info si_info;
+	struct self_grid_info sg_info;
+	struct self_analog_clk_info sa_info;
+	struct self_digital_clk_info sd_info;
+	struct self_partial_hlpm_scan sphs_info;
+
+	struct mutex vdd_self_display_lock;
+	struct mutex vdd_self_display_ioctl_lock;
+	struct self_display_op operation[FLAG_SELF_DISP_MAX];
+
+	struct self_display_debug debug;
+
+	u8 *mask_crc_pass_data;	// implemented in dtsi
+	u8 *mask_crc_read_data;
+	int mask_crc_size;
+
+	/* Self display Function */
+	int (*init)(struct samsung_display_driver_data *vdd);
+	int (*data_init)(struct samsung_display_driver_data *vdd);
+	void (*reset_status)(struct samsung_display_driver_data *vdd);
+	int (*aod_enter)(struct samsung_display_driver_data *vdd);
+	int (*aod_exit)(struct samsung_display_driver_data *vdd);
+	void (*self_mask_img_write)(struct samsung_display_driver_data *vdd);
+	void (*self_mask_on)(struct samsung_display_driver_data *vdd, int enable);
+	int (*self_mask_check)(struct samsung_display_driver_data *vdd);
+	void (*self_blinking_on)(struct samsung_display_driver_data *vdd, int enable);
+	int (*self_display_debug)(struct samsung_display_driver_data *vdd);
+	void (*self_move_set)(struct samsung_display_driver_data *vdd, int ctrl);
+	int (*self_icon_set)(struct samsung_display_driver_data *vdd);
+	int (*self_grid_set)(struct samsung_display_driver_data *vdd);
+	int (*self_aclock_set)(struct samsung_display_driver_data *vdd);
+	int (*self_dclock_set)(struct samsung_display_driver_data *vdd);
+	int (*self_time_set)(struct samsung_display_driver_data *vdd, int from_self_move);
+	int (*self_partial_hlpm_scan_set)(struct samsung_display_driver_data *vdd);
 };
 
 enum mdss_cpufreq_cluster {
@@ -1129,6 +1295,18 @@ enum BR_FUNC_LIST {
 };
 
 int samsung_panel_initialize(char *boot_str, unsigned int display_type);
+void S6E3FAB_AMB624XT01_FHD_init(struct samsung_display_driver_data *vdd);
+void S6E3FAB_AMB667XU01_FHD_init(struct samsung_display_driver_data *vdd);
+void S6E3FC3_AMS646YD01_FHD_init(struct samsung_display_driver_data *vdd);
+void S6E3HAB_AMB623TS01_WQHD_init(struct samsung_display_driver_data *vdd);
+void S6E3HAB_AMB677TY01_WQHD_init(struct samsung_display_driver_data *vdd);
+void S6E3HAD_AMB681XV01_WQHD_init(struct samsung_display_driver_data *vdd);
+void S6E8FC1_AMS660XR01_HD_init(struct samsung_display_driver_data *vdd);
+void PBA_BOOTING_FHD_init(struct samsung_display_driver_data *vdd);
+void EA8076GA_AMS638VL01_FHD_init(struct samsung_display_driver_data *vdd);
+void S6E3FC3_AMS667YM01_FHD_init(struct samsung_display_driver_data *vdd);
+void S6E3FC3_AMS646YD04_FHD_init(struct samsung_display_driver_data *vdd);
+void S6E3FC3_AMS638YQ01_FHD_init(struct samsung_display_driver_data *vdd);
 void HX83102_TV104WUM_WUXGA_init(struct samsung_display_driver_data *vdd);
 
 struct panel_func {
@@ -1981,6 +2159,14 @@ struct samsung_display_driver_data {
 	 */
 	struct ss_smmu_debug ss_debug_smmu[SMMU_MAX_DEBUG];
 	struct kmem_cache *ss_debug_smmu_cache;
+
+	/*
+	 *  SELF DISPLAY
+	 */
+	struct self_display self_disp;
+
+	/* MAFPC */
+	struct MAFPC mafpc;
 
 	/*
 	 * Samsung brightness information for smart dimming
@@ -2851,6 +3037,30 @@ static inline struct device_node *ss_get_panel_of(
 	struct dsi_panel *panel = GET_DSI_PANEL(vdd);
 
 	return panel->panel_of_node;
+}
+
+static inline struct device_node *ss_get_mafpc_of(
+		struct samsung_display_driver_data *vdd)
+{
+	struct dsi_panel *panel = GET_DSI_PANEL(vdd);
+
+	return panel->mafpc_of_node;
+}
+
+static inline struct device_node *ss_get_self_disp_of(
+		struct samsung_display_driver_data *vdd)
+{
+	struct dsi_panel *panel = GET_DSI_PANEL(vdd);
+
+	return panel->self_display_of_node;
+}
+
+static inline struct device_node *ss_get_test_mode_of(
+		struct samsung_display_driver_data *vdd)
+{
+	struct dsi_panel *panel = GET_DSI_PANEL(vdd);
+
+	return panel->test_mode_of_node;
 }
 
 static inline struct brightness_table *ss_get_br_tbl(struct samsung_display_driver_data *vdd,

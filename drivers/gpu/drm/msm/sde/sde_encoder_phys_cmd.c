@@ -19,7 +19,7 @@
 #include "sde_formats.h"
 #include "sde_trace.h"
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 #include "ss_dsi_panel_common.h"
 #endif
 
@@ -580,12 +580,25 @@ static int _sde_encoder_phys_cmd_handle_ppdone_timeout(
 			pending_kickoff_cnt,
 			frame_event);
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+	SS_XLOG(cmd_enc->pp_timeout_report_cnt);
+#elif defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 	SS_XLOG(cmd_enc->pp_timeout_report_cnt);
 
 	vdd = ss_get_vdd(PRIMARY_DISPLAY_NDX);
 	if (vdd)
 		ss_check_te(vdd);
+
+	//inc_dpui_u32_field(DPUI_KEY_QCT_PPTO, 1);
+#if 0
+	pr_err("%s (%d): pp_timeout_report_cnt: %d\n", __func__, __LINE__, cmd_enc->pp_timeout_report_cnt);
+	if (cmd_enc->pp_timeout_report_cnt < 10) {
+		/* request a ctl reset before the next kickoff */
+		phys_enc->enable_state = SDE_ENC_ERR_NEEDS_HW_RESET;
+		pr_err("%s (%d): ignore pp & phy_hw_reset\n", __func__, __LINE__);
+		goto exit;
+	}
+#endif
 
 	SDE_ERROR_CMDENC(cmd_enc,
 		"pp:%d kickoff timed out ctl %d koff_cnt %d\n",

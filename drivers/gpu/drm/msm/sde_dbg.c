@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2021, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2009-2020, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -25,7 +25,7 @@
 #include "sde/sde_hw_catalog.h"
 #include "msm_drv.h"
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 #include "ss_dsi_panel_common.h"
 #endif
 
@@ -84,7 +84,7 @@
 #define DUMP_LINE_SIZE			256
 #define DUMP_MAX_LINES_PER_BLK		512
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 /**
  * To print in kernel log
  */
@@ -4029,7 +4029,7 @@ static void _sde_dump_array(struct sde_dbg_reg_base *blk_arr[],
 		dsi_ctrl_debug_dump(sde_dbg_base.dbgbus_dsi.entries,
 				    sde_dbg_base.dbgbus_dsi.size);
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 	if (do_panic && sde_dbg_base.panic_on_err)
 		ss_store_xlog_panic_dbg();
 #endif
@@ -4188,7 +4188,7 @@ void sde_dbg_ctrl(const char *name, ...)
 	va_end(args);
 }
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 void ss_sde_dbg_debugfs_open(void)
 {
 	mutex_lock(&sde_dbg_base.mutex);
@@ -5143,7 +5143,7 @@ int sde_dbg_debugfs_register(struct device *dev)
 
 	debugfs_create_file("dbg_ctrl", 0600, debugfs_root, NULL,
 			&sde_dbg_ctrl_fops);
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 	debugfs_create_file("dump", 0644, debugfs_root, NULL,
 			&sde_evtlog_fops);
 #else

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -33,7 +33,7 @@
 
 #include "sde_dbg.h"
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 #include "ss_dsi_panel_common.h"
 #include "sde_trace.h"
 #endif
@@ -1165,7 +1165,7 @@ int dsi_message_validate_tx_mode(struct dsi_ctrl *dsi_ctrl,
 	return rc;
 }
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 static void print_cmd_desc(const struct mipi_dsi_msg *msg)
 {
 	char buf[1024];
@@ -1212,7 +1212,7 @@ static int dsi_message_tx(struct dsi_ctrl *dsi_ctrl,
 	struct dsi_mode_info *timing;
 	struct dsi_ctrl_hw_ops dsi_hw_ops = dsi_ctrl->hw.ops;
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 	struct samsung_display_driver_data *vdd = ss_get_vdd(dsi_ctrl->cell_index);
 	if (vdd->debug_data && vdd->debug_data->print_cmds)
 		print_cmd_desc(msg);
@@ -1362,11 +1362,19 @@ kickoff:
 							&cmd_mem,
 							hw_flags);
 			} else {
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+				if (msg->tx_buf[0] == 0x2a || msg->tx_buf[0] == 0x2b)
+					SDE_ATRACE_BEGIN("dsi_message_tx_flush");
+#endif
 				dsi_hw_ops.kickoff_command(
 						&dsi_ctrl->hw,
 						&cmd_mem,
 						hw_flags);
 
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+				if (msg->tx_buf[0] == 0x2a || msg->tx_buf[0] == 0x2b)
+					SDE_ATRACE_END("dsi_message_tx_flush");
+#endif
 			}
 		} else if (flags & DSI_CTRL_CMD_FIFO_STORE) {
 			dsi_hw_ops.kickoff_fifo_command(&dsi_ctrl->hw,
@@ -1374,9 +1382,18 @@ kickoff:
 							      hw_flags);
 		}
 
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+		if (msg->tx_buf[0] == 0x2a || msg->tx_buf[0] == 0x2b)
+			SDE_ATRACE_BEGIN("dsi_message_tx_wait");
+#endif
 		ret = wait_for_completion_timeout(
 				&dsi_ctrl->irq_info.cmd_dma_done,
 				msecs_to_jiffies(DSI_CTRL_TX_TO_MS));
+
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+		if (msg->tx_buf[0] == 0x2a || msg->tx_buf[0] == 0x2b)
+			SDE_ATRACE_END("dsi_message_tx_wait");
+#endif
 
 		if (ret == 0) {
 			u32 status = dsi_hw_ops.get_interrupt_status(
@@ -1399,7 +1416,7 @@ kickoff:
 						DSI_SINT_CMD_MODE_DMA_DONE);
 				pr_err("[DSI_%d]Command transfer failed\n",
 						dsi_ctrl->cell_index);
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 				/* check physical display connection */
 				if (gpio_is_valid(vdd->ub_con_det.gpio)) {
 					pr_err("[SDE] ub_con_det.gpio(%d) level=%d\n",
@@ -1999,6 +2016,7 @@ static struct platform_driver dsi_ctrl_driver = {
 	},
 };
 
+#if defined(CONFIG_DEBUG_FS)
 
 void dsi_ctrl_debug_dump(u32 *entries, u32 size)
 {
@@ -2019,7 +2037,12 @@ void dsi_ctrl_debug_dump(u32 *entries, u32 size)
 	}
 	mutex_unlock(&dsi_ctrl_list_lock);
 }
+#else
 
+void dsi_ctrl_debug_dump(u32 *entries, u32 size)
+{
+}
+#endif
 /**
  * dsi_ctrl_get() - get a dsi_ctrl handle from an of_node
  * @of_node:    of_node of the DSI controller.
@@ -2479,6 +2502,7 @@ static void dsi_ctrl_handle_error_status(struct dsi_ctrl *dsi_ctrl,
 	/* DSI FIFO OVERFLOW error */
 	if (error & 0xF0000) {
 		u32 mask = 0;
+
 		if (dsi_ctrl->hw.ops.get_error_mask)
 			mask = dsi_ctrl->hw.ops.get_error_mask(&dsi_ctrl->hw);
 		/* no need to report FIFO overflow if already masked */
@@ -2530,7 +2554,7 @@ static void dsi_ctrl_handle_error_status(struct dsi_ctrl *dsi_ctrl,
 		dsi_ctrl->hw.ops.error_intr_ctrl(&dsi_ctrl->hw, true);
 
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 	//inc_dpui_u32_field_nolock(DPUI_KEY_QCT_DSIE, 1);
 	ss_get_vdd(dsi_ctrl->cell_index)->dsi_errors = error;
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020 The Linux Foundation. All rights reserved.
  * Copyright (C) 2013 Red Hat
  * Author: Rob Clark <robdclark@gmail.com>
  *
@@ -715,53 +715,6 @@ static int _sde_debugfs_fps_status(struct inode *inode, struct file *file)
 }
 #endif
 
-static ssize_t early_wakeup_store(struct device *device,
-		struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct drm_crtc *crtc;
-	struct sde_crtc *sde_crtc;
-	struct msm_drm_private *priv;
-	u32 crtc_id;
-	bool trigger;
-
-	if (!device || !buf || !count) {
-		SDE_ERROR("invalid input param(s)\n");
-		return -EINVAL;
-	}
-
-	if (kstrtobool(buf, &trigger) < 0)
-		return -EINVAL;
-
-	if (!trigger)
-		return count;
-
-	crtc = dev_get_drvdata(device);
-	if (!crtc || !crtc->dev || !crtc->dev->dev_private) {
-		SDE_ERROR("invalid crtc\n");
-		return -EINVAL;
-	}
-
-	sde_crtc = to_sde_crtc(crtc);
-	priv = crtc->dev->dev_private;
-
-	crtc_id = drm_crtc_index(crtc);
-	if (crtc_id >= ARRAY_SIZE(priv->disp_thread)) {
-		SDE_ERROR("invalid crtc index[%d]\n", crtc_id);
-		return -EINVAL;
-	}
-
-	kthread_queue_work(&priv->disp_thread[crtc_id].worker,
-			&sde_crtc->early_wakeup_work);
-
-	return count;
-}
-
-static ssize_t early_wakeup_show(struct device *device,
-		struct device_attribute *attr, char *buf)
-{
-    return 0;
-}
-
 static ssize_t set_fps_periodicity(struct device *device,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -931,12 +884,10 @@ static DEVICE_ATTR_RO(vsync_event);
 static DEVICE_ATTR(measured_fps, 0444, measured_fps_show, NULL);
 static DEVICE_ATTR(fps_periodicity_ms, 0644, fps_periodicity_show,
 							set_fps_periodicity);
-static DEVICE_ATTR_RW(early_wakeup);
 static struct attribute *sde_crtc_dev_attrs[] = {
 	&dev_attr_vsync_event.attr,
 	&dev_attr_measured_fps.attr,
 	&dev_attr_fps_periodicity_ms.attr,
-	&dev_attr_early_wakeup.attr,
 	NULL
 };
 
@@ -2993,8 +2944,7 @@ static void sde_crtc_vblank_cb(void *data)
 		sde_crtc->vblank_cb_count++;
 
 	sde_crtc->vblank_last_cb_time = ktime_get();
-	if (sde_crtc->vsync_event_sf)
-		sysfs_notify_dirent(sde_crtc->vsync_event_sf);
+	sysfs_notify_dirent(sde_crtc->vsync_event_sf);
 
 	drm_crtc_handle_vblank(crtc);
 	DRM_DEBUG_VBL("crtc%d\n", crtc->base.id);
@@ -3132,22 +3082,23 @@ static void _sde_crtc_set_input_fence_timeout(struct sde_crtc_state *cstate)
 		sde_crtc_get_property(cstate, CRTC_PROP_INPUT_FENCE_TIMEOUT);
 	cstate->input_fence_timeout_ns *= NSEC_PER_MSEC;
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 	/* Increase fence timeout value to 20 sec (case 03381402 / P180412-02009) */
 	cstate->input_fence_timeout_ns *= 2;
 	pr_err("input_fence_timeout_ns %llu \n ", cstate->input_fence_timeout_ns);
 #endif
 }
 
-void _sde_crtc_clear_dim_layers_v1(struct drm_crtc_state *state)
+/**
+ * _sde_crtc_clear_dim_layers_v1 - clear all dim layer settings
+ * @cstate:      Pointer to sde crtc state
+ */
+static void _sde_crtc_clear_dim_layers_v1(struct sde_crtc_state *cstate)
 {
 	u32 i;
-	struct sde_crtc_state *cstate;
 
-	if (!state)
+	if (!cstate)
 		return;
-
-	cstate = to_sde_crtc_state(state);
 
 	for (i = 0; i < cstate->num_dim_layers; i++)
 		memset(&cstate->dim_layer[i], 0, sizeof(cstate->dim_layer[i]));
@@ -3184,7 +3135,7 @@ static void _sde_crtc_set_dim_layer_v1(struct drm_crtc *crtc,
 
 	if (!usr_ptr) {
 		/* usr_ptr is null when setting the default property value */
-		_sde_crtc_clear_dim_layers_v1(&cstate->base);
+		_sde_crtc_clear_dim_layers_v1(cstate);
 		SDE_DEBUG("dim_layer data removed\n");
 		return;
 	}
@@ -3809,9 +3760,6 @@ static void sde_crtc_atomic_begin(struct drm_crtc *crtc,
 		sde_encoder_trigger_kickoff_pending(encoder);
 	}
 
-	 /* update performance setting */
-		sde_core_perf_crtc_update(crtc, 1, false);
-
 	/*
 	 * If no mixers have been allocated in sde_crtc_atomic_check(),
 	 * it means we are trying to flush a CRTC whose state is disabled:
@@ -3957,6 +3905,9 @@ static void sde_crtc_atomic_flush(struct drm_crtc *crtc,
 		}
 		cstate->rsc_update = true;
 	}
+
+	/* update performance setting before crtc kickoff */
+	sde_core_perf_crtc_update(crtc, 1, false);
 
 	/*
 	 * Final plane updates: Give each plane a chance to complete all
@@ -4848,6 +4799,9 @@ static void sde_crtc_disable(struct drm_crtc *crtc)
 	u32 power_on;
 	bool in_cont_splash = false;
 	int ret, i;
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+	int blank;
+#endif
 
 	if (!crtc || !crtc->dev || !crtc->dev->dev_private || !crtc->state) {
 		SDE_ERROR("invalid crtc\n");
@@ -4989,6 +4943,13 @@ static void sde_crtc_disable(struct drm_crtc *crtc)
 	cstate->bw_split_vote = false;
 
 	mutex_unlock(&sde_crtc->crtc_lock);
+
+
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+	/* notify registered clients about suspend event */
+	blank = FB_BLANK_POWERDOWN;
+	//__msm_drm_notifier_call_chain(FB_EVENT_BLANK, &blank);
+#endif
 }
 
 static void sde_crtc_enable(struct drm_crtc *crtc,
@@ -5003,6 +4964,9 @@ static void sde_crtc_enable(struct drm_crtc *crtc,
 	u32 power_on;
 	int ret, i;
 	struct sde_crtc_state *cstate;
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+	int blank;
+#endif
 
 	if (!crtc || !crtc->dev || !crtc->dev->dev_private) {
 		SDE_ERROR("invalid crtc\n");
@@ -5084,6 +5048,12 @@ static void sde_crtc_enable(struct drm_crtc *crtc,
 	/* Enable ESD thread */
 	for (i = 0; i < cstate->num_connectors; i++)
 		sde_connector_schedule_status_work(cstate->connectors[i], true);
+
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+	/* notify registered clients about resume event */
+	blank = FB_BLANK_UNBLANK;
+	//__msm_drm_notifier_call_chain(FB_EVENT_BLANK, &blank);
+#endif
 }
 
 /* no input validation - caller API has all the checks */
@@ -6892,40 +6862,6 @@ static void __sde_crtc_idle_notify_work(struct kthread_work *work)
 	}
 }
 
-/*
- * __sde_crtc_early_wakeup_work - trigger early wakeup from user space
- */
-static void __sde_crtc_early_wakeup_work(struct kthread_work *work)
-{
-	struct sde_crtc *sde_crtc = container_of(work, struct sde_crtc,
-				early_wakeup_work);
-	struct drm_crtc *crtc;
-	struct drm_device *dev;
-	struct msm_drm_private *priv;
-	struct sde_kms *sde_kms;
-
-	if (!sde_crtc) {
-		SDE_ERROR("invalid sde crtc\n");
-		return;
-	}
-
-	if (!sde_crtc->enabled) {
-		SDE_INFO("sde crtc is not enabled\n");
-		return;
-	}
-
-	crtc = &sde_crtc->base;
-	dev = crtc->dev;
-	if (!dev) {
-		SDE_ERROR("invalid drm device\n");
-		return;
-	}
-
-	priv = dev->dev_private;
-	sde_kms = to_sde_kms(priv->kms);
-	sde_kms_trigger_early_wakeup(sde_kms, crtc);
-}
-
 /* initialize crtc */
 struct drm_crtc *sde_crtc_init(struct drm_device *dev, struct drm_plane *plane)
 {
@@ -7017,8 +6953,6 @@ struct drm_crtc *sde_crtc_init(struct drm_device *dev, struct drm_plane *plane)
 
 	kthread_init_delayed_work(&sde_crtc->idle_notify_work,
 					__sde_crtc_idle_notify_work);
-	kthread_init_work(&sde_crtc->early_wakeup_work,
-					__sde_crtc_early_wakeup_work);
 
 	SDE_DEBUG("%s: successfully initialized crtc\n", sde_crtc->name);
 	return crtc;

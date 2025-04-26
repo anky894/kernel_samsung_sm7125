@@ -23,7 +23,7 @@
 #include "sde_trace.h"
 #include "sde_encoder.h"
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 //#include "ss_dsi_panel_common.h"
 #include "ss_dsi_panel_common.h"
 #endif
@@ -458,7 +458,12 @@ static bool dsi_bridge_mode_fixup(struct drm_bridge *bridge,
 			(!(dsi_mode.dsi_mode_flags & DSI_MODE_FLAG_DYN_CLK)) &&
 			(!crtc_state->active_changed ||
 			 display->is_cont_splash_enabled)) {
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+				 if (display->panel->panel_initialized || display->is_cont_splash_enabled) {
+					 dsi_mode.dsi_mode_flags |= DSI_MODE_FLAG_DMS;
+					 LCD_INFO("DMS : switch mode %s -> %s\n", (&cur_mode)->name, adjusted_mode->name);
+				 }
+#elif defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 				if (display->panel->panel_initialized || display->is_cont_splash_enabled) {
 					struct samsung_display_driver_data *vdd = display->panel->panel_private;
 					struct vrr_info *vrr = &vdd->vrr;

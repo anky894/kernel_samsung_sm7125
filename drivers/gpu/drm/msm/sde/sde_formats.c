@@ -1021,6 +1021,7 @@ static int _sde_format_populate_addrs_ubwc(
 		layout->plane_addr[3] = 0;
 	}
 done:
+
 	return 0;
 }
 

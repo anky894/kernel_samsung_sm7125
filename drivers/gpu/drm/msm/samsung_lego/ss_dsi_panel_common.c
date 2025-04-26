@@ -31,6 +31,9 @@ Copyright (C) 2020, Samsung Electronics. All rights reserved.
 /* no drivers/input/sec_input/sec_input.h in SDM7250*/
 #include "../../../drivers/input/sec_input/sec_input.h"
 #endif
+#if defined(CONFIG_SEC_PARAM)
+#include <linux/sec_param.h>
+#endif
 
 static void ss_event_esd_recovery_init(
 		struct samsung_display_driver_data *vdd, int event, void *arg);
@@ -235,6 +238,118 @@ char ss_cmd_set_prop_map[SS_CMD_PROP_SIZE][SS_CMD_PROP_STR_LEN] = {
 	"samsung,self_idle_move_on_pattern3",
 	"samsung,self_idle_move_on_pattern4",
 	"samsung,self_idle_move_off",
+
+	/* self display */
+	"TX_SELF_DISP_CMD_START not parsed from DTSI",
+	"samsung,self_dispaly_on_revA",
+	"samsung,self_dispaly_off_revA",
+	"samsung,self_time_set_revA",
+	"samsung,self_move_on_revA",
+	"samsung,self_move_on_100_revA",
+	"samsung,self_move_on_200_revA",
+	"samsung,self_move_on_500_revA",
+	"samsung,self_move_on_1000_revA",
+	"samsung,self_move_on_debug_revA",
+	"samsung,self_move_reset_revA",
+	"samsung,self_move_off_revA",
+	"samsung,self_move_2c_sync_off_revA",
+	"samsung,self_mask_setting_pre_revA",
+	"samsung,self_mask_setting_post_revA",
+	"samsung,self_mask_mem_setting_revA",
+	"samsung,self_mask_on_revA",
+	"samsung,self_mask_on_factory_revA",
+	"samsung,self_mask_off_revA",
+	"samsung,self_mask_green_circle_on_revA",
+	"samsung,self_mask_green_circle_off_revA",
+	"samsung,self_mask_green_circle_on_factory_revA",
+	"samsung,self_mask_green_circle_off_factory_revA",
+	"TX_SELF_MASK_IMAGE not parsed from DTSI",
+	"TX_SELF_MASK_IMAGE_CRC not parsed from DTSI",
+	"samsung,self_icon_setting_pre_revA",
+	"samsung,self_icon_setting_post_revA",
+	"samsung,self_icon_mem_setting_revA",
+	"samsung,self_icon_grid_revA",
+	"samsung,self_icon_on_revA",
+	"samsung,self_icon_on_grid_on_revA",
+	"samsung,self_icon_on_grid_off_revA",
+	"samsung,self_icon_off_grid_on_revA",
+	"samsung,self_icon_off_grid_off_revA",
+	"samsung,self_icon_grid_2c_sync_off_revA",
+	"samsung,self_icon_off_revA",
+	"TX_SELF_ICON_IMAGE not parsed from DTSI",
+	"samsung,self_brightness_icon_on_revA",
+	"samsung,self_brightness_icon_off_revA",
+	"samsung,self_aclock_setting_pre_revA",
+	"samsung,self_aclock_setting_post_revA",
+	"samsung,self_aclock_sidemem_setting_revA",
+	"samsung,self_aclock_on_revA",
+	"samsung,self_aclock_time_update_revA",
+	"samsung,self_aclock_rotation_revA",
+	"samsung,self_aclock_off_revA",
+	"samsung,self_aclock_hide_revA",
+	"TX_SELF_ACLOCK_IMAGE not parsed from DTSI",
+	"samsung,self_dclock_setting_pre_revA",
+	"samsung,self_dclock_setting_post_revA",
+	"samsung,self_dclock_sidemem_setting_revA",
+	"samsung,self_dclock_on_revA",
+	"samsung,self_dclock_blinking_on_revA",
+	"samsung,self_dclock_blinking_off_revA",
+	"samsung,self_dclock_time_update_revA",
+	"samsung,self_dclock_off_revA",
+	"samsung,self_dclock_hide_revA",
+	"TX_SELF_DCLOCK_IMAGE not parsed from DTSI",
+	"samsung,self_clock_2c_sync_off_revA",
+	"TX_SELF_VIDEO_IMAGE not parsed from DTSI",
+	"samsung,self_video_mem_setting_revA",
+	"samsung,self_video_on_revA",
+	"samsung,self_video_of_revA",
+	"samsung,self_partial_hlpm_scan_set_revA",
+	"samsung,self_disp_debug_rx_cmds_revA",
+	"samsung,self_mask_check_tx_pre1_revA",
+	"samsung,self_mask_check_tx_pre2_revA",
+	"samsung,self_mask_check_tx_post_revA",
+	"samsung,self_mask_check_rx_cmds_revA",
+	"TX_SELF_DISP_CMD_END not parsed from DTSI",
+
+	/* MAFPC */
+	"TX_MAFPC_CMD_START not parsed from DTSI",
+	"samsung,mafpc_flash_sel_revA",
+	"samsung,mafpc_brightness_scale_revA",
+	"samsung,mafpc_read_1_revA",
+	"samsung,mafpc_read_2_revA",
+	"samsung,mafpc_read_3_revA",
+	"samsung,mafpc_setting_pre_for_instant_revA",
+	"samsung,mafpc_setting_pre_revA",
+	"samsung,mafpc_setting_pre2_revA",
+	"samsung,mafpc_setting_post_revA",
+	"samsung,mafpc_setting_post_for_instant_revA",
+	"samsung,mafpc_on_revA",
+	"samsung,mafpc_on_factory_revA",
+	"samsung,mafpc_off_revA",
+	"samsung,mafpc_te_on_revA",
+	"samsung,mafpc_te_off_revA",
+	"TX_SELF_MAFPC_IMAGE not parsed from DTSI",
+	"TX_MAFPC_CRC_CHECK_IMAGE not parsed from DTSI",
+	"samsung,mafpc_check_tx_pre1_revA",
+	"samsung,mafpc_check_tx_pre2_revA",
+	"samsung,mafpc_check_tx_post_revA",
+	"samsung,mafpc_check_rx_cmds_revA",
+	"TX_MAFPC_CMD_END not parsed from DTSI",
+
+	/* TEST MODE */
+	"TX_TEST_MODE_CMD_START not parsed from DTSI",
+	"samsung,gct_checksum_rx_cmds_revA",
+	"samsung,gct_enter_tx_cmds_revA",
+	"samsung,gct_mid_tx_cmds_revA",
+	"samsung,gct_exit_tx_cmds_revA",
+	"samsung,gray_spot_test_on_tx_cmds_revA",
+	"samsung,gray_spot_test_off_tx_cmds_revA",
+	"samsung,micro_short_test_on_tx_cmds_revA",
+	"samsung,micro_short_test_off_tx_cmds_revA",
+	"samsung,ccd_test_on_tx_cmds_revA",
+	"samsung,ccd_test_off_tx_cmds_revA",
+	"samsung,ccd_state_rx_cmds_revA",
+	"TX_TEST_MODE_CMD_END not parsed from DTSI",
 
 	/*FLASH GAMMA */
 	"samsung,flash_gamma_pre_tx_cmds1_revA",
@@ -547,6 +662,25 @@ EXPORT_SYMBOL(ss_is_recovery_check);
 __setup("androidboot.boot_recovery=", ss_is_recovery_check);
 void ss_event_frame_update_pre(struct samsung_display_driver_data *vdd)
 {
+	/* mAFPC */
+	if (vdd->mafpc.is_support) {
+		if (vdd->mafpc.need_to_write) {
+			LCD_INFO("update mafpc\n");
+
+			if (!IS_ERR_OR_NULL(vdd->mafpc.img_write))
+				vdd->mafpc.img_write(vdd, false);
+			else
+				LCD_ERR("mafpc img_write function is NULL\n");
+
+			if (vdd->mafpc.en)
+				vdd->mafpc.enable(vdd, true);
+			else
+				vdd->mafpc.enable(vdd, false);
+
+			vdd->mafpc.need_to_write = false;
+		}
+	}
+
 	/* Block frame update during exclusive mode on.*/
 	if (unlikely(vdd->exclusive_tx.enable)) {
 		if (unlikely(!vdd->exclusive_tx.permit_frame_update)) {
@@ -2869,6 +3003,10 @@ int ss_panel_off_post(struct samsung_display_driver_data *vdd)
 	if (!IS_ERR_OR_NULL(vdd->panel_func.samsung_panel_off_post))
 		vdd->panel_func.samsung_panel_off_post(vdd);
 
+	/* Reset Self Display Status */
+	if (vdd->self_disp.reset_status)
+		vdd->self_disp.reset_status(vdd);
+
 	if (vdd->finger_mask)
 		vdd->finger_mask = false;
 
@@ -4082,6 +4220,113 @@ static void ss_panel_parse_regulator(struct samsung_display_driver_data *vdd, st
 	return;
 }
 
+static void ss_mafpc_parse_dt(struct samsung_display_driver_data *vdd)
+{
+	struct device_node *np;
+	const char *data;
+	int i, len;
+
+	np = ss_get_mafpc_of(vdd);
+	if (!np) {
+		LCD_ERR("No mAFPC np..\n");
+		return;
+	}
+
+	/* mafpc */
+	vdd->mafpc.is_support = of_property_read_bool(np, "samsung,support_mafpc");
+	LCD_INFO("vdd->mafpc.is_support = %d\n", vdd->mafpc.is_support);
+
+	if (vdd->mafpc.is_support) {
+		/* mAFPC Check CRC data */
+		data = of_get_property(np, "samsung,mafpc_crc_pass_data", &len);
+		if (!data)
+			LCD_ERR("fail to get samsung,mafpc_crc_pass_data .. \n");
+		else {
+			vdd->mafpc.crc_pass_data = kzalloc(len, GFP_KERNEL);
+			vdd->mafpc.crc_read_data = kzalloc(len, GFP_KERNEL);
+			vdd->mafpc.crc_size = len;
+			if (!vdd->mafpc.crc_pass_data || !vdd->mafpc.crc_read_data)
+				LCD_ERR("fail to alloc for mafpc crc data \n");
+			else {
+				for (i = 0; i < len; i++) {
+					vdd->mafpc.crc_pass_data[i] = data[i];
+					LCD_ERR("mafpc crc_data[%d] = %02x\n", i, vdd->mafpc.crc_pass_data[i]);
+				}
+			}
+		}
+	}
+
+	return;
+}
+static void ss_self_disp_parse_dt(struct samsung_display_driver_data *vdd)
+{
+	struct device_node *np;
+	const char *data;
+	int i, len;
+
+	np = ss_get_self_disp_of(vdd);
+	if (!np) {
+		LCD_ERR("No self display np..\n");
+		return;
+	}
+
+	/* Self Display */
+	vdd->self_disp.is_support = of_property_read_bool(np, "samsung,support_self_display");
+	LCD_INFO("vdd->self_disp.is_support = %d\n", vdd->self_disp.is_support);
+
+	if (vdd->self_disp.is_support) {
+		/* Self Mask Check CRC data */
+		data = of_get_property(np, "samsung,mask_crc_pass_data", &len);
+		if (!data)
+			LCD_ERR("fail to get samsung,mask_crc_pass_data .. \n");
+		else {
+			vdd->self_disp.mask_crc_pass_data = kzalloc(len, GFP_KERNEL);
+			vdd->self_disp.mask_crc_read_data = kzalloc(len, GFP_KERNEL);
+			vdd->self_disp.mask_crc_size = len;
+			if (!vdd->self_disp.mask_crc_pass_data || !vdd->self_disp.mask_crc_read_data)
+				LCD_ERR("fail to alloc for mask_crc_data \n");
+			else {
+				for (i = 0; i < len; i++) {
+					vdd->self_disp.mask_crc_pass_data[i] = data[i];
+					LCD_ERR("self mask crc_data[%d] = %02x\n", i, vdd->self_disp.mask_crc_pass_data[i]);
+				}
+			}
+		}
+		/* Self Display Debug*/
+		vdd->self_disp.enable_debug = of_property_read_bool(np, "samsung,support_selfmask_debug");
+		LCD_INFO("vdd->self_disp.enable_debug = %d\n", vdd->self_disp.enable_debug);
+	}
+
+	return;
+}
+
+static void ss_test_mode_parse_dt(struct samsung_display_driver_data *vdd)
+{
+	struct device_node *np;
+	u32 tmp[2];
+	int rc;
+
+	np = ss_get_test_mode_of(vdd);
+	if (!np) {
+		LCD_ERR("No test_mode np..\n");
+		return;
+	}
+
+	/* Gram Checksum Test */
+	vdd->gct.is_support = of_property_read_bool(np, "samsung,support_gct");
+	LCD_INFO("vdd->gct.is_support = %d\n", vdd->gct.is_support);
+
+	/* ccd success,fail value */
+	rc = of_property_read_u32(np, "samsung,ccd_pass_val", tmp);
+	vdd->ccd_pass_val = (!rc ? tmp[0] : 0);
+	rc = of_property_read_u32(np, "samsung,ccd_fail_val", tmp);
+	vdd->ccd_fail_val = (!rc ? tmp[0] : 0);
+
+	LCD_INFO("CCD fail value [%02x] \n", vdd->ccd_fail_val);
+
+	return;
+}
+
 static int __ss_parse_cmd_sets_revision(struct dsi_panel_cmd_set *cmd,
 					int type, struct dsi_parser_utils *utils,
 					char (*ss_cmd_set_prop)[SS_CMD_PROP_STR_LEN])
@@ -4151,7 +4396,17 @@ int ss_dsi_panel_parse_cmd_sets(struct dsi_panel_cmd_set *cmd_sets,
 		set->ss_cmd_type = i;
 		set->count = 0;
 
-		utils = &panel->utils;
+		/* Self display has different device node */
+		if (i >= TX_SELF_DISP_CMD_START && i <= TX_SELF_DISP_CMD_END)
+			utils = &panel->self_display_utils;
+		/* mafpc has different device node */
+		else if (i >= TX_MAFPC_CMD_START && i <= TX_MAFPC_CMD_END)
+			utils = &panel->mafpc_utils;
+		/* test mode has different device node */
+		else if (i >= TX_TEST_MODE_CMD_START && i <= TX_TEST_MODE_CMD_END)
+			utils = &panel->test_mode_utils;
+		else
+			utils = &panel->utils;
 
 		rc = __ss_dsi_panel_parse_cmd_sets(set, i, utils, ss_cmd_set_prop);
 		if (rc)
@@ -4779,6 +5034,11 @@ static void ss_panel_parse_dt(struct samsung_display_driver_data *vdd)
 	/* skip DSI_CMD_SET_ON durning splash booting */
 	vdd->skip_cmd_set_on_splash_enabled = of_property_read_bool(np, "samsung,skip_cmd_set_on_splash_enabled");
 	LCD_INFO("skip_cmd_set_on_splash_enabled [%s]\n", vdd->skip_cmd_set_on_splash_enabled ? "enabled" : "disabled");
+
+	/* (mafpc) (self_display) (test_mode) have dependent dtsi file */
+	ss_mafpc_parse_dt(vdd);
+	ss_self_disp_parse_dt(vdd);
+	ss_test_mode_parse_dt(vdd);
 }
 
 /************************************************/
@@ -5033,6 +5293,10 @@ void ss_panel_lpm_ctrl(struct samsung_display_driver_data *vdd, int enable)
 				usleep_range(delay_us, delay_us);
 		}
 
+		/* Self Display Setting */
+		if (vdd->self_disp.aod_enter)
+			vdd->self_disp.aod_enter(vdd);
+
 		if (unlikely(vdd->is_factory_mode))
 			ss_send_cmd(vdd, TX_FD_OFF);
 
@@ -5080,6 +5344,10 @@ void ss_panel_lpm_ctrl(struct samsung_display_driver_data *vdd, int enable)
 			update_dsi_tcon_mdnie_register(vdd);
 		}
 	} else { /* AOD OFF(Exit) */
+		/* Self Display Setting */
+		if (vdd->self_disp.aod_exit)
+			vdd->self_disp.aod_exit(vdd);
+
 		if (vdd->panel_func.samsung_update_lpm_ctrl_cmd) {
 			vdd->panel_func.samsung_update_lpm_ctrl_cmd(vdd, enable);
 			LCD_INFO("[Panel LPM][DIPSLAY_%d] update lpm cmd done(off)\n", vdd->ndx);
@@ -6125,6 +6393,12 @@ static void ss_vrr_event_work(struct work_struct *work)
 		snprintf(vrr_mode, sizeof(vrr_mode), "%dX%d:%s\n",
 			vrr->adjusted_h_active, vrr->adjusted_v_active, vrr->adjusted_sot_hs_mode ?
 			(vrr->adjusted_phs_mode ? "PHS" : "HS") : "NOR");
+#if defined(CONFIG_SEC_PARAM)
+		if(!sec_set_param(param_index_VrrStatus, &vrr_mode)) {
+			LCD_ERR("Fail to set vrr_mode param\n");
+			return;
+		}
+#endif
 		LCD_DEBUG(" fps(%d) / vrr_mode = %s\n", vrr->adjusted_refresh_rate, vrr_mode);
 	}
 
@@ -7047,6 +7321,28 @@ void ss_panel_init(struct dsi_panel *panel)
 
 	ss_dsi_poc_init(vdd);
 
+	/* self display */
+	if (vdd->self_disp.is_support) {
+		if (vdd->self_disp.init)
+			vdd->self_disp.init(vdd);
+
+		if (vdd->self_disp.data_init)
+			vdd->self_disp.data_init(vdd);
+		else
+			LCD_ERR("no self display data init function\n");
+	}
+
+	/* mafpc */
+	if (vdd->mafpc.is_support) {
+		if (vdd->mafpc.init)
+			vdd->mafpc.init(vdd);
+
+		if (vdd->mafpc.data_init)
+			vdd->mafpc.data_init(vdd);
+		else
+			LCD_ERR("no mafpc data init function\n");
+	}
+
 	if (vdd->copr.panel_init)
 		vdd->copr.panel_init(vdd);
 
@@ -7110,6 +7406,24 @@ int samsung_panel_initialize(char *panel_string, unsigned int ndx)
 		return -1;
 	}
 
+	if (!strncmp(panel_string, "ss_dsi_panel_PBA_BOOTING_FHD", strlen(panel_string)))
+		vdd->panel_func.samsung_panel_init = PBA_BOOTING_FHD_init;
+#if defined(CONFIG_PANEL_S6E3FC3_AMS646YD04_FHD)
+	else if (!strncmp(panel_string, "ss_dsi_panel_S6E3FC3_AMS646YD04_FHD", strlen(panel_string)))
+		vdd->panel_func.samsung_panel_init = S6E3FC3_AMS646YD04_FHD_init;
+#endif
+#if defined(CONFIG_PANEL_S6E3FC3_AMS667YM01_FHD)
+	else if (!strncmp(panel_string, "ss_dsi_panel_S6E3FC3_AMS667YM01_FHD", strlen(panel_string)))
+		vdd->panel_func.samsung_panel_init = S6E3FC3_AMS667YM01_FHD_init;
+#endif
+#if defined(CONFIG_PANEL_S6E3FC3_AMS638YQ01_FHD)
+	else if (!strncmp(panel_string, "ss_dsi_panel_S6E3FC3_AMS638YQ01_FHD", strlen(panel_string)))
+		vdd->panel_func.samsung_panel_init = S6E3FC3_AMS638YQ01_FHD_init;
+#endif
+#if defined(CONFIG_PANEL_EA8076GA_AMS638VL01_FHD)
+	else if (!strncmp(panel_string, "ss_dsi_panel_EA8076GA_AMS638VL01_FHD", strlen(panel_string)))
+		vdd->panel_func.samsung_panel_init = EA8076GA_AMS638VL01_FHD_init;
+#endif
 #if defined(CONFIG_PANEL_HX83102_TV104WUM_WUXGA)
 	else if (!strncmp(panel_string, "ss_dsi_panel_HX83102_TV104WUM_WUXGA", strlen(panel_string)))
 		vdd->panel_func.samsung_panel_init = HX83102_TV104WUM_WUXGA_init;

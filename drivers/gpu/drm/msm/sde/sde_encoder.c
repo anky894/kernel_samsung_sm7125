@@ -40,7 +40,7 @@
 #include "sde_hw_top.h"
 #include "sde_hw_qdss.h"
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG) || defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 #include <linux/interrupt.h>
 #include "ss_dsi_panel_common.h"
 #endif
@@ -2444,8 +2444,6 @@ static int sde_encoder_resource_control(struct drm_encoder *drm_enc,
 			SDE_DEBUG_ENC(sde_enc, "sw_event:%d, work cancelled\n",
 					sw_event);
 
-		msm_idle_set_state(drm_enc, true);
-
 		mutex_lock(&sde_enc->rc_lock);
 
 		/* return if the resource control is already in ON state */
@@ -2561,8 +2559,6 @@ static int sde_encoder_resource_control(struct drm_encoder *drm_enc,
 			idle_pc_duration = IDLE_SHORT_TIMEOUT;
 		else
 			idle_pc_duration = IDLE_POWERCOLLAPSE_DURATION;
-
-		msm_idle_set_state(drm_enc, false);
 
 		if (!autorefresh_enabled)
 			kthread_mod_delayed_work(
@@ -4751,7 +4747,59 @@ static int _helper_flush_qsync(struct sde_encoder_phys *phys_enc)
 }
 
 
-#if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
+#if defined(CONFIG_DISPLAY_SAMSUNG)
+#include <drm/drm_encoder.h>
+int ss_get_vdd_ndx_from_state(struct drm_atomic_state *old_state)
+{
+	struct drm_crtc *crtc;
+	struct drm_crtc_state *old_crtc_state;
+	int i;
+
+	struct drm_encoder *encoder;
+	struct drm_device *dev;
+
+	struct sde_encoder_virt *sde_enc = NULL;
+	struct sde_encoder_phys *phys;
+
+	struct sde_connector *c_conn;
+	struct dsi_display *display;
+	struct samsung_display_driver_data *vdd;
+	int ndx = -EINVAL;
+
+
+	for_each_crtc_in_state(old_state, crtc, old_crtc_state, i) {
+		if (crtc->state->active) {
+			dev = crtc->dev;
+			list_for_each_entry(encoder, &dev->mode_config.encoder_list, head) {
+				if (encoder->crtc == crtc)
+					sde_enc = to_sde_encoder_virt(encoder);
+			}
+		}
+	}
+
+	if (!sde_enc)
+		return -ENODEV;
+
+	/* TOOD: remove below W/A and debug why panic occurs in video mode (DP) or writeback case */
+	if (sde_enc->disp_info.intf_type != DRM_MODE_CONNECTOR_DSI)
+		return PRIMARY_DISPLAY_NDX;
+
+
+
+	for (i = 0; i < sde_enc->num_phys_encs; i++) {
+		phys = sde_enc->phys_encs[i];
+		if (phys) {
+			c_conn = to_sde_connector(phys->connector);
+			display = c_conn->display;
+			vdd = display->panel->panel_private;
+
+			ndx = vdd->ndx;
+		}
+	}
+
+	return ndx;
+}
+#elif defined(CONFIG_DISPLAY_SAMSUNG_LEGO)
 #include <drm/drm_encoder.h>
 int ss_get_vdd_ndx_from_state(struct drm_atomic_state *old_state)
 {
@@ -6114,36 +6162,6 @@ void sde_encoder_recovery_events_handler(struct drm_encoder *encoder,
 
 	sde_enc = to_sde_encoder_virt(encoder);
 	sde_enc->recovery_events_enabled = enabled;
-}
-
-void sde_encoder_trigger_early_wakeup(struct drm_encoder *drm_enc)
-{
-	struct sde_encoder_virt *sde_enc = NULL;
-	struct msm_drm_private *priv = NULL;
-
-	priv = drm_enc->dev->dev_private;
-	sde_enc = to_sde_encoder_virt(drm_enc);
-	if (!sde_enc->crtc || (sde_enc->crtc->index
-			>= ARRAY_SIZE(priv->disp_thread))) {
-		SDE_DEBUG_ENC(sde_enc,
-			"invalid cached CRTC: %d or crtc index: %d\n",
-			sde_enc->crtc == NULL,
-			sde_enc->crtc ? sde_enc->crtc->index : -EINVAL);
-		return;
-	}
-
-	if (sde_encoder_get_intf_mode(drm_enc) != INTF_MODE_CMD) {
-		return;
-	}
-
-	SDE_ATRACE_BEGIN("sde_encoder_resource_control");
-	if (sde_enc->rc_state == SDE_ENC_RC_STATE_IDLE) {
-		sde_encoder_resource_control(drm_enc,
-					     SDE_ENC_RC_EVENT_EARLY_WAKEUP);
-
-	}
-	SDE_ATRACE_END("sde_encoder_resource_control");
-
 }
 
 #if defined(CONFIG_DISPLAY_SAMSUNG_LEGO)

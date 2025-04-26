@@ -371,6 +371,12 @@ end:
 		LCD_ERR("ub con gpio for primary = %d\n", gpio_get_value(vdd_primary->ub_con_det.gpio));
 	if (vdd_secondary && gpio_is_valid(vdd_secondary->ub_con_det.gpio))
 		LCD_ERR("ub con gpio for secondary = %d\n", gpio_get_value(vdd_secondary->ub_con_det.gpio));
+/*
+ * #ifdef CONFIG_SEC_DEBUG
+ *	sec_debug_store_additional_dbg(DBG_2_DISPLAY_ERR, 0, "%s", err_buf);
+ * #endif
+ */
+
 }
 
 static const struct file_operations xlog_dump_ops = {
@@ -1028,6 +1034,68 @@ fail_alloc:
 }
 #endif
 
+#if defined(CONFIG_SEC_DEBUG)
+static bool ss_read_debug_partition(struct lcd_debug_t *value)
+{
+	return read_debug_partition(debug_index_lcd_debug_info, (void *)value);
+}
+
+static bool ss_write_debug_partition(struct lcd_debug_t *value)
+{
+	return write_debug_partition(debug_index_lcd_debug_info, (void *)value);
+}
+
+void ss_inc_ftout_debug(const char *name)
+{
+	struct lcd_debug_t lcd_debug;
+
+	memset(&lcd_debug, 0, sizeof(struct lcd_debug_t));
+	ss_read_debug_partition(&lcd_debug);
+	lcd_debug.ftout.count += 1;
+	strncpy(lcd_debug.ftout.name, name, MAX_FTOUT_NAME);
+	ss_write_debug_partition(&lcd_debug);
+}
+
+static int dpci_notifier_callback(struct notifier_block *self,
+				 unsigned long event, void *data)
+{
+	ssize_t len = 0;
+	char tbuf[SS_XLOG_DPCI_LENGTH] = {0,};
+	struct lcd_debug_t lcd_debug;
+
+	/* 1. Read */
+	ss_read_debug_partition(&lcd_debug);
+	LCD_INFO("Read Result FTOUT_CNT=%d, FTOUT_NAME=%s\n", lcd_debug.ftout.count, lcd_debug.ftout.name);
+
+	/* 2. Make String */
+	if (lcd_debug.ftout.count) {
+		len += snprintf((tbuf + len), (SS_XLOG_DPCI_LENGTH - len),
+			"FTOUT CNT=%d ", lcd_debug.ftout.count);
+		lcd_debug.ftout.name[sizeof(lcd_debug.ftout.name) - 1] = '\0';
+		len += snprintf((tbuf + len), (SS_XLOG_DPCI_LENGTH - len),
+			"NAME=%s ", lcd_debug.ftout.name);
+	}
+
+	/* 3. Info Clear */
+	memset((void *)&lcd_debug, 0, sizeof(struct lcd_debug_t));
+	ss_write_debug_partition(&lcd_debug);
+	set_dpui_field(DPUI_KEY_QCT_SSLOG, tbuf, len);
+
+	return 0;
+}
+
+static int ss_register_dpci(struct samsung_display_driver_data *vdd)
+{
+	int ret;
+	memset(&vdd->dpci_notif, 0,
+			sizeof(vdd->dpci_notif));
+	vdd->dpci_notif.notifier_call = dpci_notifier_callback;
+
+	ret = dpui_logging_register(&vdd->dpci_notif, DPUI_TYPE_CTRL);
+	return ret;
+}
+#endif
+
 int ss_panel_debug_init(struct samsung_display_driver_data *vdd)
 {
 
@@ -1074,6 +1142,10 @@ int ss_panel_debug_init(struct samsung_display_driver_data *vdd)
 
 #ifdef CONFIG_DEBUG_FS
 	ss_panel_debugfs_init(vdd);
+#endif
+
+#if defined(CONFIG_SEC_DEBUG)
+	ss_register_dpci(vdd);
 #endif
 
 	ss_disp_dbg_info_misc_register();
