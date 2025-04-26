@@ -184,6 +184,14 @@ config INPUT_APMPOWER
 	  To compile this driver as a module, choose M here: the
 	  module will be called apm-power.
 
+config INPUT_TOUCHSCREEN_SEC_CMD
+        bool "touchscreen sec cmd"
+        depends on I2C
+        help
+          Say Y here if you need to use sec_cmd
+
+          If unsure, say N.
+
 config INPUT_KEYRESET
 	bool "Reset key"
 	depends on INPUT
