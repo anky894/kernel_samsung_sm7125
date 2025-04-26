@@ -1,10 +1,10 @@
 ifeq ($(CONFIG_ARCH_ATOLL), y)
-ifeq ($(CONFIG_SEC_GTA4XLVE_PROJECT),y)
-include $(srctree)/techpack/audio/4.0/config/sm7125_gta4xlve.conf
-export $(shell sed 's/=.*//' $(srctree)/techpack/audio/4.0/config/sm7125_gta4xlve.conf)
+ifeq ($(CONFIG_SEC_A52Q_PROJECT),y)
+include $(srctree)/techpack/audio/4.0/config/sm7125_a52.conf
+export $(shell sed 's/=.*//' $(srctree)/techpack/audio/4.0/config/sm7125_a52.conf)
 
 LINUXINCLUDE    += \
-                -include $(srctree)/techpack/audio/4.0/config/sm7125_gta4xlve.h
+                -include $(srctree)/techpack/audio/4.0/config/sm7125_a52.h
 else
 include $(srctree)/techpack/audio/4.0/config/atollauto.conf
 export $(shell sed 's/=.*//' $(srctree)/techpack/audio/4.0/config/atollauto.conf)
