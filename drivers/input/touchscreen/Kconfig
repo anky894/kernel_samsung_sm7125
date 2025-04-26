@@ -1298,5 +1298,6 @@ config TOUCHSCREEN_RAYDIUM_CHIPSET
 
 source "drivers/input/touchscreen/focaltech_touch/Kconfig"
 source "drivers/input/touchscreen/himax/hx831xx/Kconfig"
+source "drivers/input/touchscreen/zinitix/zt7650/Kconfig"
 
 endif
