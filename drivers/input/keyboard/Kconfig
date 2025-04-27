@@ -218,6 +218,16 @@ config INPUT_HALL_IC
 	  Enable Hall IC Feature
 	  If unsure, say N.
 
+config SENSORS_HALL
+        bool "HALL"
+        default n
+        help
+          Say Y here to enable the HALL
+          and send a event when HALL state is changed.
+          Active gpio state is low and active event value is 0.
+
+          If unsure, say N.
+
 config KEYBOARD_GPIO
 	tristate "GPIO Buttons"
 	depends on GPIOLIB || COMPILE_TEST
