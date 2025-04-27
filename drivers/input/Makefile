@@ -7,6 +7,7 @@
 
 obj-$(CONFIG_INPUT)		+= input-core.o
 input-core-y := input.o input-compat.o input-mt.o ff-core.o
+obj-$(CONFIG_SEC_DEBUG_TSP_LOG) += sec_tsp_log.o
 obj-$(CONFIG_INPUT_TOUCHSCREEN_SEC_CMD) += sec_cmd.o
 obj-$(CONFIG_INPUT_TOUCHSCREEN_TCLMV2)  += sec_tclm_v2.o
 
